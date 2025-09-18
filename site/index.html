@@ -1,0 +1,48 @@
+<!doctype html>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  /* Scales to any container while keeping 800×500 ratio */
+  .wrap {
+    width: 100%;
+    max-width: 800px;            /* optional cap */
+    aspect-ratio: 800 / 500;     /* keep ratio */
+    position: relative;
+  }
+  canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;   /* fill wrapper */
+    display: block;
+  }
+</style>
+
+<div class="wrap"><canvas id="rive"></canvas></div>
+
+<script src="https://unpkg.com/@rive-app/canvas@2"></script>
+<script>
+  const canvas = document.getElementById('rive');
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+
+  // Resize backing store to match CSS size (prevents blur, no scrollbars)
+  function resizeCanvas() {
+    const { clientWidth: w, clientHeight: h } = canvas;
+    canvas.width  = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+  }
+  // Observe size changes (works inside Google Sites iframe)
+  new ResizeObserver(resizeCanvas).observe(canvas);
+
+  const r = new rive.Rive({
+    src: "./assets/animation.riv",
+    canvas,
+    autoplay: true,
+    artboard: "Artboard",
+    stateMachines: ["State Machine 1"],
+    layout: new rive.Layout({
+      fit: rive.Fit.contain,      // or .cover if you prefer cropping
+      alignment: rive.Alignment.center
+    })
+  });
+
+  // Initial sizing
+  resizeCanvas();
+</script>

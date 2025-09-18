@@ -1,35 +1,39 @@
 <!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
-  /* Scales to any container while keeping 800×500 ratio */
-  .wrap {
+  /* Responsive wrapper: fills whatever size the Sites iframe gets */
+  #wrap {
     width: 100%;
-    max-width: 800px;            /* optional cap */
-    aspect-ratio: 800 / 500;     /* keep ratio */
+    aspect-ratio: 800 / 500;   /* keeps 800×500 ratio */
     position: relative;
   }
-  canvas {
+  #rive {
     position: absolute; inset: 0;
-    width: 100%; height: 100%;   /* fill wrapper */
+    width: 100%; height: 100%;
     display: block;
   }
 </style>
 
-<div class="wrap"><canvas id="rive"></canvas></div>
+<div id="wrap"><canvas id="rive"></canvas></div>
 
 <script src="https://unpkg.com/@rive-app/canvas@2"></script>
 <script>
+  const wrap = document.getElementById('wrap');
   const canvas = document.getElementById('rive');
-  const dpr = Math.max(1, window.devicePixelRatio || 1);
 
-  // Resize backing store to match CSS size (prevents blur, no scrollbars)
+  function dpr() { return Math.max(1, window.devicePixelRatio || 1); }
+
   function resizeCanvas() {
-    const { clientWidth: w, clientHeight: h } = canvas;
-    canvas.width  = Math.round(w * dpr);
-    canvas.height = Math.round(h * dpr);
+    // Use wrapper's size, not canvas's
+    const w = wrap.clientWidth;
+    const h = wrap.clientHeight;
+    canvas.width  = Math.round(w * dpr());
+    canvas.height = Math.round(h * dpr());
   }
-  // Observe size changes (works inside Google Sites iframe)
-  new ResizeObserver(resizeCanvas).observe(canvas);
+
+  // Observe wrapper size for reliable resize inside Google Sites
+  new ResizeObserver(resizeCanvas).observe(wrap);
+  window.addEventListener('resize', resizeCanvas);
 
   const r = new rive.Rive({
     src: "./assets/animation.riv",
@@ -38,7 +42,7 @@
     artboard: "Artboard",
     stateMachines: ["State Machine 1"],
     layout: new rive.Layout({
-      fit: rive.Fit.contain,      // or .cover if you prefer cropping
+      fit: rive.Fit.cover,           // <-- fills area; switch to .contain if you need full view with padding
       alignment: rive.Alignment.center
     })
   });
